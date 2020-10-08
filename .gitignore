@@ -1,0 +1,5 @@
+.DS_Store
+.vs
+VersionObserver/.DS_Store
+VersionObserver/bin
+VersionObserver/obj
