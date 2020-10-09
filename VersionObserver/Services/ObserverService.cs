@@ -25,17 +25,24 @@ namespace VersionObserver.Services
     {
         private IAzureDevOpsApiProxyService _apiProxy;
         ILogger<ObserverService> _logger;
+        List<string> result;
+        IRestResponse response;
 
         public ObserverService(ILogger<ObserverService> logger, IAzureDevOpsApiProxyService apiProxy)
         {
             _apiProxy = apiProxy;
             _logger = logger;
         }
+        public ObserverService(ILogger<ObserverService> logger, IAzureDevOpsApiProxyService apiProxy, List<string> _result, IRestResponse _response)
+        {
+            _apiProxy = apiProxy;
+            _logger = logger;
+            _result = result;
+            _response = response;
+        }
 
         public IEnumerable<string> GetRepos(string reposURI)
         {
-            List<string> result;
-            IRestResponse response;
             _apiProxy.CallAzureDevOpsAPI(reposURI, out result, out response);
 
             var responseObject = JsonSerializer.Deserialize<Rootobject>(response.Content);
@@ -49,8 +56,6 @@ namespace VersionObserver.Services
         }
         public IEnumerable<string> GetItemsFromRepo(string repoURI)
         {
-            var result = new List<string>();
-            IRestResponse response;
             _apiProxy.CallAzureDevOpsAPI(repoURI + "/items", out result, out response);
 
             var responseObject = JsonSerializer.Deserialize<ItemsRootobject>(response.Content);
@@ -69,8 +74,6 @@ namespace VersionObserver.Services
 
         public string GetTreeURIFromItem(string itemURI)
         {
-            var result = new List<string>();
-            IRestResponse response;
             _apiProxy.CallAzureDevOpsAPI(itemURI, out result, out response);
 
             var item = JsonSerializer.Deserialize<ItemRootobject>(response.Content);
@@ -80,11 +83,9 @@ namespace VersionObserver.Services
 
             public TreeObject.Rootobject GetTreeObjectFromTree(string treeURI)
         {
-            var result = new List<string>();
             TreeObject.Rootobject responseObject = null;
             try
             {
-                IRestResponse response;
                 _apiProxy.CallAzureDevOpsAPI(treeURI + "?recursive=true&api-version=6.0", out result, out response);
 
                 responseObject = JsonSerializer.Deserialize<TreeObject.Rootobject>(response.Content);
