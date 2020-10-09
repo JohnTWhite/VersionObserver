@@ -3,12 +3,6 @@ namespace VersionObserver.Models
 {
     public class TreeObject
     {
-        public TreeObject()
-        {
-        }
-
-    
-
 
         public class Rootobject
         {
