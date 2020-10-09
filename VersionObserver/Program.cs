@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Xml;
 using VersionObserver.Models;
+using VersionObserver.Services;
 
 namespace VersionObserver
 {

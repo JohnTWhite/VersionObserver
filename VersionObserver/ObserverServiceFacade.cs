@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Xml;
 using VersionObserver.Models;
+using VersionObserver.Services;
 
 namespace VersionObserver
 {

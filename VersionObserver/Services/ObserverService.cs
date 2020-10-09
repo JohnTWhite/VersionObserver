@@ -12,7 +12,7 @@ using RestSharp;
 using VersionObserver.Models;
 using VersionObserver.Services;
 
-namespace VersionObserver
+namespace VersionObserver.Services
 {
     public interface IObserverService
     {

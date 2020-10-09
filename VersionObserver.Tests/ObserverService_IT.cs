@@ -17,7 +17,7 @@ namespace VersionObserver.Tests
                 AuthToken = "SubstituteWithRealValue",
                 Cookies = "SubstituteWithRealValue"
             };
-            testObject = new ObserverService(new AzureDevOpsApiProxyService(configuration));
+            testObject = new ObserverService(null, new AzureDevOpsApiProxyService(configuration));
         }
 
         [Fact(Skip ="Integration Test")]

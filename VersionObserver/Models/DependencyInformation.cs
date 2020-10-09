@@ -1,5 +1,5 @@
 ﻿using System;
-namespace VersionObserver
+namespace VersionObserver.Models
 {
     public class DependencyInformation
     {

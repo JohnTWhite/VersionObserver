@@ -8,7 +8,7 @@ using System.Xml;
 using Dapper;
 using VersionObserver.Models;
 
-namespace VersionObserver
+namespace VersionObserver.Services
 {
     public class FileService
     {
