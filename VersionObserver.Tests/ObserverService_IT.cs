@@ -17,6 +17,7 @@ namespace VersionObserver.Tests
                 AuthToken = "SubstituteWithRealValue",
                 Cookies = "SubstituteWithRealValue"
             };
+            //todo: mock a logger.
             testObject = new ObserverService(null, new AzureDevOpsApiProxyService(configuration));
         }
 
