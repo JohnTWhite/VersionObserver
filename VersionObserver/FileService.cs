@@ -16,12 +16,6 @@ namespace VersionObserver
         {
         }
 
-        /// <summary>
-        /// Pass folder path to be recursively searched, 
-        /// returns csproj xml files.
-        /// </summary>
-        /// <param name="folderPath"></param>
-        /// <returns></returns>
         public IEnumerable<CSProjFile> GetCSProjFiles(string folderPath)
         {
             List<CSProjFile> result = new List<CSProjFile>();
@@ -34,11 +28,7 @@ namespace VersionObserver
             }
             return result;
         }
-
-        /// <summary>
-        /// Save Dependencies to SQL Database.
-        /// </summary>
-        /// <param name="dependencies"></param>
+        
         public void SaveDependencies(IEnumerable<DependencyInformation> dependencies)
         {
             var _connectionString = "Data Source=chqdev04;Initial Catalog=Packages;Integrated Security=true;Connection Timeout=25;";
@@ -69,12 +59,6 @@ namespace VersionObserver
             }
         }
 
-        /// <summary>
-        /// Pass in list of XMLDocument Csproj files to,
-        /// return a list of project dependencies.
-        /// </summary>
-        /// <param name="csprojFiles"></param>
-        /// <returns></returns>
         public IEnumerable<DependencyInformation> GetDependenciesFromProjectFiles(IEnumerable<CSProjFile> csprojFiles)
         {
             IList<DependencyInformation> results = new List<DependencyInformation>();
