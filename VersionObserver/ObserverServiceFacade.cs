@@ -8,9 +8,9 @@ namespace VersionObserver
 {
     public class ObserverServiceFacade
     {
-        private ObserverService _service;
+        private IObserverService _service;
         private string _devOpsApiUrl;
-        public ObserverServiceFacade(ObserverService service, AzureDevOpsApiConfiguration apiConfigurations)
+        public ObserverServiceFacade(IObserverService service, AzureDevOpsApiConfiguration apiConfigurations)
         {
             _service = service;
             _devOpsApiUrl = apiConfigurations.BaseURL;

@@ -40,7 +40,7 @@ namespace VersionObserver
 
             serviceCollection.AddSingleton<FileService>(sc => new FileService());
             serviceCollection.AddSingleton<IAzureDevOpsApiProxyService, AzureDevOpsApiProxyService>();
-            serviceCollection.AddSingleton<ObserverService>();
+            serviceCollection.AddSingleton<IObserverService, ObserverService>();
             serviceCollection.AddSingleton<ObserverServiceFacade>();
 
             return serviceCollection.BuildServiceProvider();
