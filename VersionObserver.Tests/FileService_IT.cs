@@ -13,7 +13,7 @@ namespace VersionObserver.Tests
             testObject = new FileService();
         }
 
-        [Fact]
+        [Fact(Skip = "Integration Test")]
         public void GetFiles()
         {
             //arrange
@@ -27,7 +27,7 @@ namespace VersionObserver.Tests
             Assert.NotNull(result);
         }
 
-        [Fact]
+        [Fact(Skip = "Integration Test")]
         public void CanDetermineDependencies()
         {
             //arrange
@@ -41,7 +41,7 @@ namespace VersionObserver.Tests
             Assert.NotNull(result);
         }
 
-        [Fact]
+        [Fact(Skip = "Integration Test")]
         public void SaveDependencies()
         {
             //arrange

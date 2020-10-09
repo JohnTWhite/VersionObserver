@@ -60,7 +60,7 @@ namespace VersionObserver
                 }
                 catch (Exception ex)
                 {
-
+                    throw ex;
                 }
                 finally
                 {

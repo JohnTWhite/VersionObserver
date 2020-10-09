@@ -1,6 +1,7 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30523.141
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VersionObserver", "VersionObserver\VersionObserver.csproj", "{7403000C-5B8A-4314-9C89-B78CBA511965}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VersionObserver.Tests", "VersionObserver.Tests\VersionObserver.Tests.csproj", "{DA99476D-9829-4548-8A6E-024E0C9FCF8F}"
@@ -19,5 +20,11 @@ Global
 		{DA99476D-9829-4548-8A6E-024E0C9FCF8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA99476D-9829-4548-8A6E-024E0C9FCF8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA99476D-9829-4548-8A6E-024E0C9FCF8F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D2FFF57B-346E-4482-A0B0-F5EE0B59D388}
 	EndGlobalSection
 EndGlobal

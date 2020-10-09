@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Xml;
 using VersionObserver.Models;
 
@@ -9,29 +12,51 @@ namespace VersionObserver
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Starting the OBSERVSTION");
+            
 
-            //Collect CSProj's with project dependencies
-            var fileService = new FileService();
-            var serviceFacade = new ObserverServiceFacade(new ObserverService());
-            IEnumerable<CSProjFile> csprojFiles;
+            var serviceProvider = Startup.ConfigureServices();
+            var logger = serviceProvider.GetService<ILogger<Program>>();
+            var fileService = serviceProvider.GetRequiredService<FileService>();
+            var serviceFacade = serviceProvider.GetRequiredService<ObserverServiceFacade>();
 
-            if (args.Length > 0)
+            try
             {
-                csprojFiles = fileService.GetCSProjFiles(args[0]);
+                logger.LogInformation("STARTING the OBSERVSTION");
+
+                //Collect CSProj's with project dependencies
+                IEnumerable<CSProjFile> csprojFiles;
+
+                //When an argument is present it is assumed to be a file path on disc that should be
+                //recurssively searched for all CSProj files. This behavior is substituted for AzureDevOps API search.
+                if (args.Length > 0)
+                {
+                    logger.LogInformation($"BEGIN {nameof(FileService.GetCSProjFiles)} with Arguments {args[0]}");
+                    csprojFiles = fileService.GetCSProjFiles(args[0]);
+                    logger.LogInformation($"END {nameof(FileService.GetCSProjFiles)} with Arguments {args[0]}");
+                }
+                else
+                {
+                    logger.LogInformation($"BEGIN {nameof(ObserverServiceFacade.GetAzureDevOpsCSProjFiles)}");
+                    csprojFiles = serviceFacade.GetAzureDevOpsCSProjFiles();
+                    logger.LogInformation($"END {nameof(ObserverServiceFacade.GetAzureDevOpsCSProjFiles)}");
+                }
+
+                //Format data to object with "Project" "Package" "Version" properties.
+                logger.LogInformation($"BEGIN {nameof(FileService.GetDependenciesFromProjectFiles)}");
+                IEnumerable<DependencyInformation> dependencies = fileService.GetDependenciesFromProjectFiles(csprojFiles);
+                logger.LogInformation($"END {nameof(FileService.GetDependenciesFromProjectFiles)}");
+
+                //Save Data to Dedicated database. 
+                logger.LogInformation($"BEGIN {nameof(FileService.SaveDependencies)}");
+                fileService.SaveDependencies(dependencies);
+                logger.LogInformation($"END {nameof(FileService.SaveDependencies)}");
+
+                logger.LogInformation("STOPPING the OBSERVSTION");
             }
-            else
+            catch(Exception e)
             {
-                csprojFiles = serviceFacade.GetAzureDevOpsCSProjFiles();
+                logger.LogError("Unable to complete process due to exception: ", new { ExceptionMessage = e });
             }
-
-            //Format data to object with "Project" "Package" "Version" properties.
-            IEnumerable<DependencyInformation> dependencies = fileService.GetDependenciesFromProjectFiles(csprojFiles);
-
-            //Save Data to Dedicated database. 
-            fileService.SaveDependencies(dependencies);
-
-            Console.WriteLine("Ending the OBSERVSTION");
         }
     }
 }

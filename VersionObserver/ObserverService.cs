@@ -7,54 +7,51 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.Extensions.Logging;
 using RestSharp;
 using VersionObserver.Models;
+using VersionObserver.Services;
 
 namespace VersionObserver
 {
-    public class ObserverService
+    public interface IObserverService
     {
-        private string _authToken;
-        private string _cookies;
-        private string _authWithBearer;
+        IEnumerable<string> GetRepos(string reposURI);
+        IEnumerable<string> GetItemsFromRepo(string repoURI);
+        string GetTreeURIFromItem(string itemURI);
+        TreeObject.Rootobject GetTreeObjectFromTree(string treeURI);
+    }
+    public class ObserverService : IObserverService
+    {
+        private IAzureDevOpsApiProxyService _apiProxy;
+        ILogger<ObserverService> _logger;
 
-        public ObserverService(string authToken, string cookies)
+        public ObserverService(ILogger<ObserverService> logger, IAzureDevOpsApiProxyService apiProxy)
         {
-            _authToken = authToken;
-            _cookies = cookies;
-            _authWithBearer = string.Join("Basic ", _authToken);
+            _apiProxy = apiProxy;
+            _logger = logger;
         }
 
         public IEnumerable<string> GetRepos(string reposURI)
         {
-            var result =  new List<string>();
-            var client = new RestClient(reposURI);
-            client.Timeout = -1;
-            var request = new RestRequest(Method.GET);
-
-            request.AddHeader("Authorization", _authWithBearer);
-            request.AddHeader("Cookie", _cookies);
-            IRestResponse response = client.Execute(request);
+            List<string> result;
+            IRestResponse response;
+            _apiProxy.CallAzureDevOpsAPI(reposURI, out result, out response);
 
             var responseObject = JsonSerializer.Deserialize<Rootobject>(response.Content);
 
-            foreach(var value in responseObject.value)
+            foreach (var value in responseObject.value)
             {
-                result.Add( value.url);
+                result.Add(value.url);
             }
 
             return result;
         }
-
         public IEnumerable<string> GetItemsFromRepo(string repoURI)
         {
             var result = new List<string>();
-            var client = new RestClient(repoURI + "/items");
-            client.Timeout = -1;
-            var request = new RestRequest(Method.GET);
-            request.AddHeader("Authorization", _authWithBearer);
-            request.AddHeader("Cookie", _cookies);
-            IRestResponse response = client.Execute(request);
+            IRestResponse response;
+            _apiProxy.CallAzureDevOpsAPI(repoURI + "/items", out result, out response);
 
             var responseObject = JsonSerializer.Deserialize<ItemsRootobject>(response.Content);
 
@@ -73,12 +70,8 @@ namespace VersionObserver
         public string GetTreeURIFromItem(string itemURI)
         {
             var result = new List<string>();
-            var client = new RestClient(itemURI);
-            client.Timeout = -1;
-            var request = new RestRequest(Method.GET);
-            request.AddHeader("Authorization", _authWithBearer);
-            request.AddHeader("Cookie", _cookies);
-            IRestResponse response = client.Execute(request);
+            IRestResponse response;
+            _apiProxy.CallAzureDevOpsAPI(itemURI, out result, out response);
 
             var item = JsonSerializer.Deserialize<ItemRootobject>(response.Content);
 
@@ -91,38 +84,28 @@ namespace VersionObserver
             TreeObject.Rootobject responseObject = null;
             try
             {
-                var client = new RestClient(treeURI + "?recursive=true&api-version=6.0");
-                client.Timeout = -1;
-                var request = new RestRequest(Method.GET);
-                request.AddHeader("Authorization", _authWithBearer);
-                request.AddHeader("Cookie", _cookies);
-                IRestResponse response = client.Execute(request);
+                IRestResponse response;
+                _apiProxy.CallAzureDevOpsAPI(treeURI + "?recursive=true&api-version=6.0", out result, out response);
 
                 responseObject = JsonSerializer.Deserialize<TreeObject.Rootobject>(response.Content);
             }
             catch
             {
-                Console.WriteLine("Couldn't Get Tree" + treeURI);
+                _logger.LogWarning("Could not get repository tree" + treeURI);
             }
             return responseObject;
         }
 
-        public class Project
-        {
-            public string projectURL { get; set; }
-            public string projectName { get; set; }
-        }
 
-
-        public IEnumerable<Project> GetCSProjIfPresentInTree(TreeObject.Rootobject treeRoots)
+        public IEnumerable<ProjectFileMetaData> GetCSProjIfPresentInTree(TreeObject.Rootobject treeRoots)
         {
-            var results = new List<Project>();
+            var results = new List<ProjectFileMetaData>();
             if (treeRoots != null && treeRoots.treeEntries != null) { 
             foreach (var treeItem in treeRoots.treeEntries)
             {
                 if (treeItem.relativePath.Contains("csproj"))
                 {
-                    results.Add(new Project() { projectName = treeItem.relativePath, projectURL = treeItem.url });
+                    results.Add(new ProjectFileMetaData() { projectName = treeItem.relativePath, projectURL = treeItem.url });
                 }
             } }
             return results;
@@ -133,20 +116,15 @@ namespace VersionObserver
         {
             try
             {
-                var client = new RestClient(blobURL);
-                client.Timeout = -1;
-                var request = new RestRequest(Method.GET);
-                request.AddHeader("Accept", "application/xml");
-                request.AddHeader("Authorization", _authWithBearer);
-                request.AddHeader("Cookie", _cookies);
-                IRestResponse response = client.Execute(request);
+                IRestResponse response = _apiProxy.GetCSProjBlobXML(blobURL);
                 Console.WriteLine(response.Content);
 
                 //Ensuring correct xml structure needs a little hand holding.
                 string x = "";
                 var bytes = Encoding.ASCII.GetBytes(response.Content);
-                foreach(var b in bytes){
-                        x += (char)b;
+                foreach (var b in bytes)
+                {
+                    x += (char)b;
                 }
                 x = x.Replace("?", "");
 
@@ -154,12 +132,13 @@ namespace VersionObserver
                 result.LoadXml(x);
                 return result;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                Console.WriteLine("Unable to retrieve csproj blob object" + blobURL);
-                Console.WriteLine(e);
+                _logger.LogWarning("Unable to retrieve csproj blob object" + blobURL);
+                _logger.LogWarning(e.InnerException.ToString());
             }
             return null;
         }
+
     }
 }

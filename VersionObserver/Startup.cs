@@ -1,26 +1,49 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Serilog;
+using System;
 using System.IO;
+using VersionObserver.Models;
+using VersionObserver.Services;
+using Microsoft.Extensions.Logging;
 
 namespace VersionObserver
 {
-    public class Startup
+    public static class Startup
     {
-        public IConfiguration Configuration { get; }
-        public Startup(IConfiguration configuration)
+        public static IServiceProvider ConfigureServices()
         {
-            Configuration = new ConfigurationBuilder()
+            //Moving from out of the compiled bin/debug/netcore folder into the solution level.
+            var parentDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent;
+            //to retrieve config files, in an enviroment agnostic way. 
+            var configFilePath = Path.Combine(parentDirectory.FullName,"configs", "VersionObserver.json");
+            var Configuration = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
-                .AddJsonFile(Path.Combine("config", "DiscoverMerchantRegistration.MessageConsumer.json"), optional: false, reloadOnChange: true)
+                .AddJsonFile(configFilePath, optional: false, reloadOnChange: true)
                 .Build();
 
             Log.Logger = new LoggerConfiguration()
-                .ReadFrom.ConfigurationSection(Configuration.GetSection("Serilog"))
                 .CreateLogger();
+
+            return ConfigureServices(Configuration);
         }
 
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public static IServiceProvider ConfigureServices(IConfiguration services)
         {
-            throw new NotImplementedException();
+            var serviceCollection = new ServiceCollection();
+
+            serviceCollection.AddLogging(sc => sc.AddConsole());
+
+            var apiConfiguration = new AzureDevOpsApiConfiguration();
+            services.GetSection("AzureDevOpsApiConfiguration").Bind(apiConfiguration, c => c.BindNonPublicProperties = true);
+            serviceCollection.AddSingleton<AzureDevOpsApiConfiguration>(sc => apiConfiguration);
+
+            serviceCollection.AddSingleton<FileService>(sc => new FileService());
+            serviceCollection.AddSingleton<IAzureDevOpsApiProxyService, AzureDevOpsApiProxyService>();
+            serviceCollection.AddSingleton<ObserverService>();
+            serviceCollection.AddSingleton<ObserverServiceFacade>();
+
+            return serviceCollection.BuildServiceProvider();
         }
     }
 }

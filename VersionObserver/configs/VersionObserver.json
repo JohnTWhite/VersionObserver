@@ -1,0 +1,6 @@
+{
+    "AzureDevOpsApiConfiguration":{
+    "AuthToken": "This is just an example, authentication commponents should be in a secret store, not plain text",
+    "Cookies": "This is just an example, authentication commponents should be in a secret store, not plain text"
+    }
+}

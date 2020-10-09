@@ -1,4 +1,6 @@
 ﻿using System;
+using VersionObserver.Models;
+using VersionObserver.Services;
 using Xunit;
 
 namespace VersionObserver.Tests
@@ -6,12 +8,19 @@ namespace VersionObserver.Tests
     public class ObserverService_IT
     {
         ObserverService testObject;
+        AzureDevOpsApiConfiguration configuration;
+
         public ObserverService_IT()
         {
-            testObject = new ObserverService();
+            configuration = new AzureDevOpsApiConfiguration()
+            {
+                AuthToken = "SubstituteWithRealValue",
+                Cookies = "SubstituteWithRealValue"
+            };
+            testObject = new ObserverService(new AzureDevOpsApiProxyService(configuration));
         }
 
-        [Fact]
+        [Fact(Skip ="Integration Test")]
         public void CanGetXMLFile()
         {
             //arrange
@@ -22,7 +31,8 @@ namespace VersionObserver.Tests
             //assert
             Assert.NotNull(result);
         }
-        [Fact]
+
+        [Fact(Skip = "Integration Test")]
         public void GetReposGetsRepos()
         {
             //arrange
