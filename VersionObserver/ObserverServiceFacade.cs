@@ -8,11 +8,12 @@ namespace VersionObserver
 {
     public class ObserverServiceFacade
     {
-        ObserverService _service;
-        const string DEVOPSURI = "https://dev.azure.com/ClearentTFS/Clearent/_apis/git/repositories";
-        public ObserverServiceFacade(ObserverService service)
+        private ObserverService _service;
+        private string _devOpsApiUrl;
+        public ObserverServiceFacade(ObserverService service, AzureDevOpsApiConfiguration apiConfigurations)
         {
             _service = service;
+            _devOpsApiUrl = apiConfigurations.BaseURL;
         }
 
         /// <summary>
@@ -23,7 +24,7 @@ namespace VersionObserver
         public IEnumerable<CSProjFile> GetAzureDevOpsCSProjFiles()
         {
 
-            var reposURIs = _service.GetRepos(DEVOPSURI);
+            var reposURIs = _service.GetRepos(_devOpsApiUrl);
 
             IList<CSProjFile> results = new List<CSProjFile>();
             foreach (var repo in reposURIs)

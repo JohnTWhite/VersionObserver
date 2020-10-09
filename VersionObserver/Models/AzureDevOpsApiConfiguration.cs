@@ -8,6 +8,7 @@ namespace VersionObserver.Models
     {
         public string AuthToken { get; set; }
         public string Cookies { get; set; }
+        public string BaseURL { get; set; }
     }
 
 }
