@@ -12,6 +12,6 @@ Queries Azure Devops Repository for CSProject references. Saves references and v
 
 ## Query Azure Dev Ops API
 - Create a PAT (Personal Access Token) in Azure Devops.
-- Configure azure devops token VersionObserver.json in configs folder. Ensure you also provide a cookie.
+- Configure VersionObserver.json in configs folder. Ensure you provide all values.
 - Run the application without any command line arguments.
 - This will recursively search all repositories for CSProj files, convert them to type XMLDocument, and save project refrences, and version to the dedicated database.
